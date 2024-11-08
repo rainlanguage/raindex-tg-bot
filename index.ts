@@ -23,19 +23,19 @@ const bot = new TelegramBot(token, {
 // Set bot commands so they appear in the menu
 bot.setMyCommands([
   { command: '/start', description: 'Start' },
-  { command: '/get_tvls', description: 'Get the current TVLs for Raindex' },
-  { command: '/get_volume', description: 'Get the total volume data for Raindex' },
-  { command: '/get_daily_volume', description: 'Get daily volume per chain for raindex' },
-  { command: '/get_daily_token_distribution', description: 'Get token distrubition' },
-  { command: '/get_most_traded_tokens', description: 'Get most traded tokens on raindex' },
-  { command: '/get_monthly_volume', description: 'Get monthly volumes for past 12 months.' },
+  { command: '/get_tvls', description: 'Get the TVL per chain for Raindex' },
+  { command: '/get_volume', description: 'Get the total per chain volume data for Raindex' },
+  { command: '/get_daily_volume', description: 'Get daily volume per chain for Raindex' },
+  { command: '/get_daily_token_distribution', description: 'Get token distribution' },
+  { command: '/get_most_traded_tokens', description: 'Get most traded tokens on Raindex' },
+  { command: '/get_monthly_volume', description: 'Get monthly volumes for past 12 months' },
 ]);
 
 bot.onText(/\/start/, (msg: Message) => {
   const chatId: number = msg.chat.id;
 
   const startMessage = `
-  Welcome to the Raindex Bot! Here are the available commands:
+  Welcome to the Raindex Defillama Bot! Here are the available commands:
 
   1. /get_tvls - Get the current TVLs (Total Value Locked) for Raindex.
   2. /get_volume - Get the total volume data for Raindex.
