@@ -27,7 +27,6 @@ bot.setMyCommands([
   { command: '/get_volume', description: 'Get the total per chain volume data for Raindex' },
   { command: '/get_daily_volume', description: 'Get daily volume per chain for Raindex' },
   { command: '/get_daily_token_distribution', description: 'Get token distribution' },
-  { command: '/get_most_traded_tokens', description: 'Get most traded tokens on Raindex' },
   { command: '/get_monthly_volume', description: 'Get monthly volumes for past 12 months' },
 ]);
 
@@ -41,8 +40,7 @@ bot.onText(/\/start/, (msg: Message) => {
   2. /get_volume - Get the total volume data for Raindex.
   3. /get_daily_volume - Get daily volume per chain for Raindex.
   4. /get_daily_token_distribution - Get token distribution across chains for Raindex.
-  5. /get_most_traded_tokens - Get the most traded tokens on Raindex.
-  6. /get_monthly_volume - Get monthly volumes for the past 12 months.
+  5. /get_monthly_volume - Get monthly volumes for the past 12 months.
 
   Use any of these commands to retrieve the latest information about Raindex. Enjoy exploring the data!
   `;
@@ -280,142 +278,6 @@ bot.onText(/\/get_daily_token_distribution/, async (msg: Message) => {
 
     // Send the pie chart to the user
     bot.sendPhoto(chatId, chartUrl, { caption: 'Top 10 Token Distribution (USD) for Raindex' });
-    // Send the token distribution in text format
-    bot.sendMessage(chatId, tokenMessage);
-
-  } catch (error) {
-    console.error('Error fetching token distribution data:', error);
-    bot.sendMessage(chatId, 'Sorry, there was an error fetching the token distribution data.');
-  }
-});
-
-bot.onText(/\/get_most_traded_tokens/, async (msg: Message) => {
-  const chatId: number = msg.chat.id;
-
-  try {
-    // Make the GET request to the Llama API
-    const response = await axios.get('https://api.llama.fi/protocol/raindex', {
-      headers: {
-        accept: '*/*'
-      }
-    });
-
-    const tokensInUsdArray = response.data.tokensInUsd;
-
-    // Initialize an object to store aggregated token values
-    const tokenAggregates: { [token: string]: number } = {};
-
-    // Iterate over each entry in the tokensInUsdArray
-    tokensInUsdArray.forEach((entry: any) => {
-      if (entry && entry.tokens) {
-        Object.keys(entry.tokens).forEach(tokenName => {
-          const tokenValue = entry.tokens[tokenName];
-          if (tokenValue && typeof tokenValue === 'number') {
-            // Add to the aggregate for the token
-            tokenAggregates[tokenName] = (tokenAggregates[tokenName] || 0) + tokenValue;
-          }
-        });
-      }
-    });
-
-    // Convert the tokenAggregates object to an array for sorting
-    const aggregatedTokens = Object.keys(tokenAggregates).map(tokenName => ({
-      tokenName,
-      tokenValue: tokenAggregates[tokenName]
-    }));
-
-    // Sort tokens by value in descending order
-    const sortedTokens = aggregatedTokens.sort((a, b) => b.tokenValue - a.tokenValue);
-
-    // Extract the top 10 tokens
-    const topTokens = sortedTokens.slice(0, 10);
-
-    // Calculate total value for top 10 tokens and percentages
-    const totalValue = topTokens.reduce((sum, token) => sum + token.tokenValue, 0);
-    const percentages = topTokens.map(token => ((token.tokenValue / totalValue) * 100).toFixed(2));
-
-    // Generate chart labels for the top 10 tokens
-    const chartLabels = topTokens.map((token, index) => `${token.tokenName} ($${token.tokenValue.toLocaleString()} - ${percentages[index]}%)`);
-
-    // Generate the token distribution message
-    let tokenMessage = 'Raindex - Top 10 Traded Tokens All-Time (USD):\n\n';
-    topTokens.forEach((token, index) => {
-      tokenMessage += `${token.tokenName}: $${token.tokenValue.toLocaleString(undefined, { 
-        minimumFractionDigits: 2, 
-        maximumFractionDigits: 2 
-      })} (${percentages[index]}%)\n`;
-    });
-
-    // Generate dynamic background colors
-    const backgroundColor = generateColorPalette(topTokens.length);
-
-    // Create the pie chart URL using QuickChart.io
-    const chartUrl = `https://quickchart.io/chart?c=${encodeURIComponent(JSON.stringify({
-      type: 'pie',
-      data: {
-        labels: chartLabels,
-        datasets: [{
-          label: 'Top 10 Traded Tokens (USD)',
-          data: topTokens.map(token => token.tokenValue),
-          backgroundColor: backgroundColor, // Dynamically generated background colors
-          borderColor: '#ffffff',
-          borderWidth: 3,
-          hoverBorderWidth: 4,
-          hoverBorderColor: '#ccc'
-        }]
-      },
-      options: {
-        plugins: {
-          title: {
-            display: true,
-            text: 'Raindex - Top 10 Traded Tokens All-Time (USD)',
-            font: {
-              size: 22,
-              weight: 'bold',
-              family: "'Helvetica', 'Arial', sans-serif"
-            },
-            color: '#ffffff'
-          },
-          legend: {
-            position: 'right',
-            labels: {
-              font: {
-                size: 14,
-                family: "'Helvetica', 'Arial', sans-serif",
-                weight: 'bold'
-              },
-              boxWidth: 18,
-              padding: 25,
-              color: '#ffffff' // White text for contrast on dark background
-            }
-          },
-          tooltip: {
-            callbacks: {
-              label: (tooltipItem: any) => {
-                const label = chartLabels[tooltipItem.dataIndex];
-                const value = topTokens[tooltipItem.dataIndex].tokenValue.toLocaleString(undefined, { minimumFractionDigits: 2 });
-                return `${label}: $${value}`;
-              }
-            }
-          },
-          datalabels: {
-            display: false // Disable data labels on the pie chart itself
-          }
-        },
-        layout: {
-          padding: {
-            left: 15,
-            right: 15,
-            top: 15,
-            bottom: 15
-          }
-        },
-        backgroundColor: '#2c2c2c' // Grey background color
-      }
-    }))}&w=600&h=600`; // Set the width and height of the pie chart
-
-    // Send the pie chart to the user
-    bot.sendPhoto(chatId, chartUrl, { caption: 'Top 10 Traded Tokens All-Time (USD) for Raindex' });
     // Send the token distribution in text format
     bot.sendMessage(chatId, tokenMessage);
 

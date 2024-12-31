@@ -1,5 +1,5 @@
 services:
-  arb_bot:
+  raindex-tg-bot:
     image: rainprotocol/raindex-tg-bot:${DOCKER_CHANNEL} # Ensure DOCKER_CHANNEL is set or provide a default tag
     env_file: .env # Load environment variables from .env file
     restart: always # Automatically restart the bot if it crashes
